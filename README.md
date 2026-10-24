@@ -2,7 +2,7 @@
 
 A full-stack AI-powered web application that analyzes your resume and a target job description to generate a **personalized interview strategy**, **technical & behavioral questions**, **skill gap analysis**, and a **downloadable tailored resume PDF**.
 
-Live Demo → **[View on Netlify](https://ai-interview-guide-np.netlify.app)**
+Live Demo → **[Resume Roadmap and Builder](https://ai-interview-guide-np.netlify.app)**
 
 ---
 
