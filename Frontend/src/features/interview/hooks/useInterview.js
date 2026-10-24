@@ -79,7 +79,17 @@ export const useInterview = () => {
         }
         catch (error) {
             console.error("Download resume error:", error);
-            alert("Failed to download resume PDF. Please try again.");
+            let errorMessage = "Failed to download resume PDF. Please check server logs.";
+            if (error.response?.data instanceof Blob) {
+                try {
+                    const text = await error.response.data.text();
+                    const parsed = JSON.parse(text);
+                    if (parsed.message) errorMessage = parsed.message;
+                } catch (_) {}
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }

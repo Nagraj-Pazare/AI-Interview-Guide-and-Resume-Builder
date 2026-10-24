@@ -128,10 +128,15 @@ async function generateInterviewReport({
 }
 
 async function generatePdfFromHtml(html) {
+    if (!html || typeof html !== "string") {
+        throw new Error("No HTML content provided for PDF generation.");
+    }
+
     const launchArgs = [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
         '--disable-gpu',
         '--no-first-run',
         '--no-zygote',
@@ -148,27 +153,29 @@ async function generatePdfFromHtml(html) {
     }
 
     const browser = await puppeteer.launch(options);
-    const page = await browser.newPage();
+    try {
+        const page = await browser.newPage();
 
-    // Change waitUntil to 'domcontentloaded' so it doesn't hang on external assets/fonts
-    await page.setContent(html, { 
-        waitUntil: "domcontentloaded", 
-        timeout: 60000 
-    });
+        await page.setContent(html, { 
+            waitUntil: "domcontentloaded", 
+            timeout: 60000 
+        });
 
-    const pdfBuffer = await page.pdf({ 
-        format: "A4", 
-        printBackground: true,
-        margin:{
-          top:"20mm",
-          bottom:"20mm",
-          left:"15mm",
-          right:"15mm"
-        } 
-    });
+        const pdfBuffer = await page.pdf({ 
+            format: "A4", 
+            printBackground: true,
+            margin: {
+              top: "20mm",
+              bottom: "20mm",
+              left: "15mm",
+              right: "15mm"
+            } 
+        });
 
-    await browser.close();
-    return pdfBuffer;
+        return pdfBuffer;
+    } finally {
+        await browser.close();
+    }
 }
 
 const resumePdfSchema = {
@@ -206,9 +213,13 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
     });
 
     const jsonContent = response.parsed ?? JSON.parse(response.text || "{}");
+    const html = jsonContent?.html || (typeof jsonContent === 'string' ? jsonContent : null);
 
-    const pdfBuffer = await generatePdfFromHtml(jsonContent.html);
+    if (!html) {
+        throw new Error("AI failed to generate valid HTML for the resume.");
+    }
 
+    const pdfBuffer = await generatePdfFromHtml(html);
     return pdfBuffer;
 }
 
