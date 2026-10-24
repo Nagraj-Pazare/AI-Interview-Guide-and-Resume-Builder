@@ -1,10 +1,13 @@
 import axios from "axios";
 
 
+// Automatically use Render URL in production if VITE_API_URL is missing
+const baseURL = import.meta.env.VITE_API_URL || 'https://ai-interview-guide-and-resume-builder.onrender.com';
+
 const api = axios.create({
-    baseURL: "http://localhost:3000",
-    withCredentials: true
-})
+  baseURL: baseURL,
+  withCredentials: true, // Needed if you are using cookies/sessions for auth
+});
 
 
 export async function register({ username, email, password }) {
