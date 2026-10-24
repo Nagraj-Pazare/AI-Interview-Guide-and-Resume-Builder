@@ -1,0 +1,32 @@
+.nav-bar{
+    margin: 0;
+    padding: 0.8rem;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    background-color: #0d1117;
+   
+}
+
+.user-greet{
+    font-weight: 700;
+     font-size: 1rem;
+}
+
+.username{
+    color: #ff2d78;
+    text-transform: capitalize;
+    
+}
+
+.nav-heading{
+  background: linear-gradient(150deg, #efeeef, #ff2d78);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  font-size: 1rem;
+
+
+}
