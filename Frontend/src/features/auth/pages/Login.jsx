@@ -28,6 +28,10 @@ const Login = () => {
 
     return (
         <main>
+            <div className='top'>
+                <h1>Access Your Resume Builder</h1>
+                <p>Sign in to generate reports & PDFs</p>
+            </div>
             <div className="form-container">
                 <h1>Login</h1>
                 {error && <div style={{ color: "#ef4444", marginBottom: "1rem", fontSize: "0.9rem" }}>{error}</div>}
@@ -35,6 +39,7 @@ const Login = () => {
                     <div className='input-group'>
                         <label htmlFor="email">Email</label>
                         <input
+                            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" 
                             required
                             onChange={(e) => { setEmail(e.target.value); }}
                             type="email" name="email" id="email" placeholder='Enter Email Address' />
@@ -42,6 +47,8 @@ const Login = () => {
                     <div className='input-group'>
                         <label htmlFor="password">Password</label>
                         <input
+                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
+                            title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" 
                             required
                             onChange={(e) => { setPassword(e.target.value); }}
                             type="password" name="password" id="password" placeholder='Enter Password' />
