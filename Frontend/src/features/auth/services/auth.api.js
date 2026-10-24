@@ -1,6 +1,5 @@
 import axios from "axios";
 
-
 // Automatically use Render URL in production if VITE_API_URL is missing
 const baseURL = import.meta.env.VITE_API_URL || 'https://ai-interview-guide-and-resume-builder.onrender.com';
 
@@ -9,62 +8,52 @@ const api = axios.create({
   withCredentials: true, // Needed if you are using cookies/sessions for auth
 });
 
+// Interceptor to inject bearer token if present in localStorage
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export async function register({ username, email, password }) {
-   try {
-   const response = await api.post("/api/auth/register",{
-        username,
-        email,
-        password
-    })
+  const response = await api.post("/api/auth/register", {
+    username,
+    email,
+    password
+  });
 
-    return response.data;
+  if (response.data?.token) {
+    localStorage.setItem("token", response.data.token);
+  }
 
-   } catch(err){
-    console.log(err);
-    
-   }
+  return response.data;
 }
-
 
 export async function login({ email, password }) {
-    try {
-        
-        const response = await api.post("/api/auth/login",{
-            email, password
-        })
+  const response = await api.post("/api/auth/login", {
+    email,
+    password
+  });
 
-        return response.data;
+  if (response.data?.token) {
+    localStorage.setItem("token", response.data.token);
+  }
 
-    } catch (error) {
-        console.log(error);
-        
-    }
+  return response.data;
 }
 
-
 export async function logout() {
-    try {
-        
-        const response = await api.get("/api/auth/logout")
-
-        return response.data;
-
-    } catch (err) {
-       console.log(err);
-        
-    }
+  try {
+    const response = await api.post("/api/auth/logout");
+    return response.data;
+  } finally {
+    localStorage.removeItem("token");
+  }
 }
 
 export async function getMe() {
-    try {
-        
-        const response = await api.get("/api/auth/get-me")
-
-        return response.data
-
-    } catch (err) {
-        console.log(err);
-        
-    }
+  const response = await api.get("/api/auth/get-me");
+  return response.data;
 }

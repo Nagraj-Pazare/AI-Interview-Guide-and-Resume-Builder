@@ -1,30 +1,45 @@
-import React, { useState, useRef } from 'react'
-import "../style/home.scss"
-import { useInterview } from '../hooks/useInterview.js'
-import { useNavigate } from 'react-router'
+import { useState, useRef } from 'react';
+import "../style/home.scss";
+import { useInterview } from '../hooks/useInterview.js';
+import { useNavigate } from 'react-router';
 import Navbar from '../common/Navbar';
 
 const Home = () => {
+    const { loading, generateReport, reports } = useInterview();
+    const [ jobDescription, setJobDescription ] = useState("");
+    const [ selfDescription, setSelfDescription ] = useState("");
+    const resumeInputRef = useRef();
 
-    const { loading, generateReport,reports } = useInterview()
-    const [ jobDescription, setJobDescription ] = useState("")
-    const [ selfDescription, setSelfDescription ] = useState("")
-    const resumeInputRef = useRef()
-
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current.files[ 0 ]
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
-    }
+        if (!jobDescription || !jobDescription.trim()) {
+            alert("Please provide a target job description.");
+            return;
+        }
+
+        const resumeFile = resumeInputRef.current?.files?.[0];
+        if (!resumeFile && !selfDescription?.trim()) {
+            alert("Please either upload a Resume (PDF) or provide a Quick Self-Description.");
+            return;
+        }
+
+        try {
+            const data = await generateReport({ jobDescription, selfDescription, resumeFile });
+            if (data?._id) {
+                navigate(`/interview/${data._id}`);
+            }
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to generate interview strategy. Please try again.");
+        }
+    };
 
     if (loading) {
         return (
             <main className='loading-screen'>
                 <h1>Loading your interview plan...</h1>
             </main>
-        )
+        );
     }
 
     return (
@@ -50,12 +65,12 @@ const Home = () => {
                             <span className='badge badge--required'>Required</span>
                         </div>
                         <textarea
-                            onChange={(e) => { setJobDescription(e.target.value) }}
+                            onChange={(e) => { setJobDescription(e.target.value); }}
                             className='panel__textarea'
                             placeholder={`Paste the full job description here...\ne.g. 'Senior Frontend Engineer at Google requires proficiency in React, TypeScript, and large-scale system design...'`}
                             maxLength={5000}
                         />
-                        <div className='char-counter'>0 / 5000 chars</div>
+                        <div className='char-counter'>{jobDescription.length} / 5000 chars</div>
                     </div>
 
                     {/* Vertical Divider */}
@@ -81,8 +96,8 @@ const Home = () => {
                                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
                                 </span>
                                 <p className='dropzone__title'>Click to upload or drag &amp; drop</p>
-                                <p className='dropzone__subtitle'>PDF or DOCX (Max 5MB)</p>
-                                <input ref={resumeInputRef} hidden type='file' id='resume' name='resume' accept='.pdf,.docx' />
+                                <p className='dropzone__subtitle'>PDF or DOCX (Max 3MB)</p>
+                                <input ref={resumeInputRef} hidden type='file' id='resume' name='resume' accept='.pdf' />
                             </label>
                         </div>
 
@@ -93,7 +108,7 @@ const Home = () => {
                         <div className='self-description'>
                             <label className='section-label' htmlFor='selfDescription'>Quick Self-Description</label>
                             <textarea
-                                onChange={(e) => { setSelfDescription(e.target.value) }}
+                                onChange={(e) => { setSelfDescription(e.target.value); }}
                                 id='selfDescription'
                                 name='selfDescription'
                                 className='panel__textarea panel__textarea--short'
@@ -124,7 +139,7 @@ const Home = () => {
             </div>
 
             {/* Recent Reports List */}
-            {reports.length > 0 && (
+            {reports && reports.length > 0 && (
                 <section className='recent-reports'>
                     <h2>My Recent Interview Plans</h2>
                     <ul className='reports-list'>
@@ -146,7 +161,7 @@ const Home = () => {
                 <a href='#'>Help Center</a>
             </footer>
         </div>
-    )
-}
+    );
+};
 
-export default Home
+export default Home;

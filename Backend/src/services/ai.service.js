@@ -116,11 +116,11 @@ async function generateInterviewReport({
   Job Description: ${jobDescription}`;
 
   const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash-lite",
+    model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      responseJsonSchema: interviewReportSchema,
+      responseSchema: interviewReportSchema,
     },
   });
 
@@ -128,10 +128,26 @@ async function generateInterviewReport({
 }
 
 async function generatePdfFromHtml(html) {
-    const browser = await puppeteer.launch({ 
+    const launchArgs = [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process'
+    ];
+
+    const options = {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
-    });
+        args: launchArgs
+    };
+
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+        options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+
+    const browser = await puppeteer.launch(options);
     const page = await browser.newPage();
 
     // Change waitUntil to 'domcontentloaded' so it doesn't hang on external assets/fonts
@@ -181,7 +197,7 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
     `;
 
     const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash-lite",
+        model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
         contents: prompt,
         config: {
             responseMimeType: "application/json",
